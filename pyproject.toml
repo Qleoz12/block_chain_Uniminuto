@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "block-chain-api"
+version = "0.1.0"
+description = ""
+authors = ["qleoz12 <kintaroloop@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+Flask = "^1.1.2"
+requests = "^2.25.1"
+marshmallow = "^3.11.1"
+colorama = "^0.4.4"
+marshmallow-oneofschema = "^2.1.0"
+structlog = "^21.1.0"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
