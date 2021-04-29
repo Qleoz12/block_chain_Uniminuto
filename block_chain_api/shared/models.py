@@ -1,8 +1,7 @@
 
 class Ping:
-    def __init__(self, block_height, peer_count, is_miner):
-
-
+    def __init__(self):
+        pass
 
 class Transaction:
     def __init__(self, hash, sender, receiver, signature, timestamp, amount):
@@ -33,3 +32,4 @@ class Block:
         self.previous_hash = previous_hash
         self.nonce = nonce
         self.timestamp = timestamp
+
