@@ -3,7 +3,7 @@ from multiprocessing.connection import Client
 from marshmallow import Schema, fields, post_load
 from marshmallow_oneofschema import OneOfSchema
 
-#from block_chain_api.shared.schema import Cliente, Block, Transaction, Ping
+from block_chain_api.shared.models import TransactionModel
 
 import structlog
 
@@ -30,6 +30,9 @@ class TransactionMessage(Schema):
     def add_name(self, data, **kwargs):
         data["name"] = "transaction"
         return data
+
+    def make(self, data, **kwargs):
+        return TransactionModel(**data)
 
 
 class PingMessage(Schema):
@@ -104,12 +107,8 @@ class MessageDisambiguation(OneOfSchema):
     logger.info(OneOfSchema)
 
     def get_obj_type(self, obj):
-        if isinstance(obj, TransactionMessage):
-            return "foo"
-        elif isinstance(obj, BlockMessage):
-            return "bar"
-        else:
-            raise Exception("Unknown object type: {}".format(obj.__class__.__name__))
+        if isinstance(obj, dict):
+            return obj.get("name")
 
 
 class MetaSchema(Schema):

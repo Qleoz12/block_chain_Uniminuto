@@ -15,6 +15,7 @@ class Blockchain(object):
         self.pending_transactions = []
         self.target = "0000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
 
+        self.wallets = []
         self.chain.append(self.new_block())
 
     def new_block(self):
@@ -68,3 +69,23 @@ class Blockchain(object):
     def add_block(self, block):
         # TODO: Add proper validation logic here!
         self.chain.append(block)
+
+    def checkWalletmovement(self,sender,receiver):
+
+        flagwallet1=False
+        flagwallet2= False
+
+
+
+        for wallet in self.wallets:
+            if wallet.public_key == sender.public_key:
+                flagwallet1=True
+                senderdata=wallet
+            if wallet.public_key == receiver.public_key:
+                flagwallet2=True
+                receiverdata=wallet
+
+        if flagwallet1 and flagwallet2:
+            return senderdata,receiverdata
+
+        return None,None

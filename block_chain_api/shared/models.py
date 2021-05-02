@@ -3,8 +3,8 @@ class Ping:
     def __init__(self):
         pass
 
-class Transaction:
-    def __init__(self, hash, sender, receiver, signature, timestamp, amount):
+class TransactionModel:
+    def __init__(self,  sender, receiver, signature, timestamp, amount,hash=None):
         self.hash = hash
         self.sender = sender
         self.receiver = receiver
