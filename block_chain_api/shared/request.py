@@ -1,13 +1,13 @@
 from multiprocessing.connection import Client
 
-from marshmallow import Schema, fields, post_load
+from marshmallow import Schema, fields, post_load, pre_load
 from marshmallow_oneofschema import OneOfSchema
 
-from block_chain_api.shared.models import TransactionModel
+from block_chain_api.shared.models import TransactionModel, WalletModel
 
 import structlog
 
-from block_chain_api.shared.schema import Cliente, Block, Transaction, Ping
+from block_chain_api.shared.schema import Cliente, Block, Transaction, Ping,Wallet
 
 logger = structlog.getLogger(__name__)
 '''
@@ -25,7 +25,6 @@ class BlockMessage(Schema):
 
 class TransactionMessage(Schema):
     payload = fields.Nested(Transaction)
-
     @post_load
     def add_name(self, data, **kwargs):
         data["name"] = "transaction"
@@ -33,6 +32,16 @@ class TransactionMessage(Schema):
 
     def make(self, data, **kwargs):
         return TransactionModel(**data)
+
+class WalletMessage(Schema):
+    payload = fields.Nested(Wallet)
+    @post_load
+    def add_name(self, data, **kwargs):
+        data["name"] = "wallet"
+        return data
+
+    def make(self, data, **kwargs):
+        return WalletModel(**data)
 
 
 class PingMessage(Schema):
@@ -103,6 +112,7 @@ class MessageDisambiguation(OneOfSchema):
         "ping": PingMessage,
         "block": BlockMessage,
         "transaction": TransactionMessage,
+        "wallet": WalletMessage,
     }
     logger.info(OneOfSchema)
 
@@ -115,7 +125,12 @@ class MetaSchema(Schema):
     address = fields.Nested(Cliente)
     client = fields.Str()
 
+class Error(Schema):
+    message = fields.Str(missing="")
+    code = fields.Int(missing=0)
+
 
 class BaseSchema(Schema):
-    meta = fields.Nested(MetaSchema())
+    meta= fields.Nested(MetaSchema())
     message = fields.Nested(MessageDisambiguation())
+    error = fields.Nested(Error(),missing=Error().load({}))

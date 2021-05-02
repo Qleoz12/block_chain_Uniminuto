@@ -5,6 +5,11 @@ from marshmallow import Schema, fields, validates_schema, ValidationError
 from marshmallow_oneofschema import OneOfSchema
 
 
+class Wallet(Schema):
+    public_key  = fields.Str(required=True)
+    signature   = fields.Str()
+    balance     =fields.Str()
+    timestamp   = fields.Int()
 
 class Transaction(Schema):
     timestamp = fields.Int()
@@ -42,6 +47,9 @@ class Block(Schema):
 class Cliente(Schema):
     ip = fields.Str(required=True)
     port = fields.Int(required=True)
+
+
+
 
 
 class Ping(Schema):

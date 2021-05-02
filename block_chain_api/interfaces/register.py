@@ -8,7 +8,7 @@ class Register(object):
         self.coordinator=coordinator
 
 
-    def registrarTransaccion(self,tx: TransactionModel):
+    def checkTransaccion(self,tx: TransactionModel):
         '''
         validar transacione provenientes de wallet
         :param tx:
@@ -16,5 +16,8 @@ class Register(object):
         '''
         # validar que ambas direciones existan
         senderValue,receiverValue= self.coordinator.checkWallets(tx.sender, tx.receiver)
-        self.coordinator.hola()
-        return False,"no paso la validacion"
+
+        if senderValue and receiverValue:
+            return True,senderValue,receiverValue
+        else:
+            return False,senderValue,receiverValue

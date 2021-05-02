@@ -5,7 +5,8 @@ from marshmallow.exceptions import MarshmallowError, ValidationError
 
 import structlog
 
-from block_chain_api.shared.request import BaseSchema, create_cliente_message, create_transaction_message,create_block_message
+from block_chain_api.shared.request import BaseSchema, create_cliente_message, create_transaction_message, \
+    create_block_message, Error
 from block_chain_api.shared.schema import Block,Ping,Cliente,Transaction
 
 logger = structlog.getLogger(__name__)
@@ -20,6 +21,7 @@ class Parser:
         try:
             logger.info(request)
             message = BaseSchema().load(request);
+            message['error']=Error().load({})
             return message,False
         except ValidationError as error:
             logger.error(error)

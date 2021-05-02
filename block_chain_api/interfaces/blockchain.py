@@ -5,6 +5,9 @@ import random
 from hashlib import sha256
 from time import time
 import structlog
+
+from block_chain_api.shared.models import WalletModel, TransactionModel
+
 logger = structlog.getLogger("blockchain")
 
 
@@ -70,12 +73,15 @@ class Blockchain(object):
         # TODO: Add proper validation logic here!
         self.chain.append(block)
 
-    def checkWalletmovement(self,sender,receiver):
+    def isOpen(self):
+        return len(self.pending_transactions)<4
 
+    def addTransacction(self,tx: TransactionModel):
+        self.pending_transactions.append(tx)
+
+    def checkWalletmovement(self,sender,receiver):
         flagwallet1=False
         flagwallet2= False
-
-
 
         for wallet in self.wallets:
             if wallet.public_key == sender.public_key:
@@ -89,3 +95,20 @@ class Blockchain(object):
             return senderdata,receiverdata
 
         return None,None
+
+    def checkWallet(self,wallettocheck:WalletModel):
+        for wallet in self.wallets:
+            if wallet.public_key == wallettocheck.public_key:
+                return wallet
+
+        return None
+
+    def registerWallet(self,wallet: WalletModel):
+        if not wallet.balance:
+            wallet.balance=0
+        if True:
+
+            self.wallets.append(wallet)
+            return wallet
+
+

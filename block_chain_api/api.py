@@ -46,7 +46,58 @@ def transacion_create():
             return message,400
         #crear nueva transaccion
         txregistrada=coordinator.registrarTransaccion(message)
+
+        if txregistrada['error']\
+            and message['error']['code']!=0:
+            return txregistrada,txregistrada['error']['code']
+
         return jsonify(txregistrada), 200
+
+
+@app.route('/wallet/consultarFondos', methods=['POST'])
+def wallet_checkFondos():
+        requestdata = request.get_json()
+        #parseo del json para obtener un objeto valido
+        message,error = Parser.parseJson(requestdata)
+
+        if error:
+            return message,400
+        #crear consulta
+        txregistrada=coordinator.consultarFondos(message)
+
+        if txregistrada['error']\
+        and message['error']['code']!=0:
+            return txregistrada,txregistrada['error']['code']
+
+        return jsonify(txregistrada), 200
+
+@app.route('/wallet/registrar', methods=['POST'])
+def wallet_registrar():
+        requestdata = request.get_json()
+        #parseo del json para obtener un objeto valido
+        message,error = Parser.parseJson(requestdata)
+
+        if error:
+            return message,400
+        #crear consulta
+        message=coordinator.wallet_registrar(message)
+
+        if message['error'] and message['error']['code']!=0:
+            return message,message['error']['code']
+
+        return jsonify(message), 200
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 if __name__ == '__main__':
