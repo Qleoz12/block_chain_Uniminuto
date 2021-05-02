@@ -1,4 +1,6 @@
 import sys, os
+from datetime import datetime
+
 sys.path.append(os.path.abspath('.'))
 
 from block_chain_api.shared.request import BaseSchema, TransactionMessage, Error, WalletMessage
@@ -51,17 +53,32 @@ class Coordinator(object):
     def registrarTransaccion(self,tx: BaseSchema):
         txmodel=TransactionMessage().make(tx['message']['payload'])
         canregister,sender,receiver=self.register.checkTransaccion(txmodel)
+
+        if not canregister:
+            logger.info("fallo de wallets")
+            tx['error']['message'] = "alguna de las wallets tiene problemas"
+            tx['error']['code'] = 400
+            return tx
         #validacion
         if not sender.balance>txmodel.amount:
-            canregister=False
+            logger.info("fallo de montos")
+            tx['error']['message'] = "el monto supera los balances"
+            tx['error']['code'] = 400
+            return tx
 
         # validacion
         if not self.blockchain.isOpen():
-            canregister = False
+            logger.info("fallo de bloque")
+            tx['error']['message'] = "el bloque se encuentra cerrado"
+            tx['error']['code'] = 400
+            return tx
 
         if canregister:
             logger.info("registro tx")
-            self.blockchain.addTransacction(txmodel)
+            txmodel=self.blockchain.addTransacction(txmodel)
+            tx['message']['payload']['index']=txmodel.index
+            tx['message']['payload']['timestamp'] = datetime.utcnow().isoformat()
+            return tx
         else:
             tx['error']['message'] = "la transaccion no se puede registrar"
             tx['error']['code'] = 400

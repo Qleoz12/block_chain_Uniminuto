@@ -77,7 +77,9 @@ class Blockchain(object):
         return len(self.pending_transactions)<4
 
     def addTransacction(self,tx: TransactionModel):
+        tx.index=len(self.pending_transactions)
         self.pending_transactions.append(tx)
+        return tx
 
     def checkWalletmovement(self,sender,receiver):
         flagwallet1=False

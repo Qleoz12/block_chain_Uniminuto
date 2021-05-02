@@ -16,6 +16,7 @@ class WalletModel:
 class TransactionModel:
     def __init__(self,  sender, receiver, signature, timestamp, amount,hash=None):
         self.hash = hash
+        self.index=0
         self.sender = sender
         self.receiver = receiver
         self.signature = signature # firma de la wallet

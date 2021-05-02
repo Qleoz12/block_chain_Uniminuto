@@ -47,8 +47,8 @@ def transacion_create():
         #crear nueva transaccion
         txregistrada=coordinator.registrarTransaccion(message)
 
-        if txregistrada['error']\
-            and message['error']['code']!=0:
+        if txregistrada['error'] \
+                and message['error']['code']!=0:
             return txregistrada,txregistrada['error']['code']
 
         return jsonify(txregistrada), 200

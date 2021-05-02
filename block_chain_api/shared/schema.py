@@ -8,7 +8,7 @@ from marshmallow_oneofschema import OneOfSchema
 class Wallet(Schema):
     public_key  = fields.Str(required=True)
     signature   = fields.Str()
-    balance     =fields.Str()
+    balance     =fields.Int()
     timestamp   = fields.Int()
 
 class Transaction(Schema):
