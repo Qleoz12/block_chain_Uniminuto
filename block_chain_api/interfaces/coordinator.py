@@ -3,7 +3,7 @@ from datetime import datetime
 
 sys.path.append(os.path.abspath('.'))
 
-from block_chain_api.shared.request import BaseSchema, TransactionMessage, Error, WalletMessage
+from block_chain_api.shared.request import BaseSchema, TransactionMessage, Error, WalletMessage, BlockMessage,create_transaction_message
 from block_chain_api.shared.models import WalletModel
 
 import structlog
@@ -14,6 +14,7 @@ class Coordinator(object):
     def __init__(self):
         self.register=Register(self)
         self.blockchain = Blockchain()
+        self.minero = Minero(self.blockchain)
         pass
 
     def hola(self):
@@ -84,7 +85,22 @@ class Coordinator(object):
             tx['error']['code'] = 400
             return tx
 
+    def minar(self,walletrequest: BaseSchema):
 
+        block= self.minero.minar()
+        block.mined_by=walletrequest['message']['payload']['public_key']
+        self.blockchain.add_block(block)
+        #llenado de data
+        ip=walletrequest['meta']['address']['ip']
+        port=walletrequest['meta']['address']['port']
+        tx=TransactionMessage.load({
+            "sender": "master",
+            "receiver": walletrequest['message']['payload']['public_key'],
+            "amount": "10"})
+        txmessage=create_transaction_message(ip,port,tx)
+        txreaponse=self.registrarTransaccion(txmessage)
+        logger.info(txreaponse)
+        return block
 
 
 
@@ -92,3 +108,5 @@ class Coordinator(object):
 
 from .register import Register
 from .blockchain import Blockchain
+from .minero import Minero
+

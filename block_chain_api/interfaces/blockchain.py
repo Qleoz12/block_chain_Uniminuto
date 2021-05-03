@@ -31,9 +31,6 @@ class Blockchain(object):
             timestamp=time(),
         )
 
-        # Reset the list of pending transactions
-        self.pending_transactions = []
-
         return block
 
     @staticmethod
@@ -71,6 +68,7 @@ class Blockchain(object):
 
     def add_block(self, block):
         # TODO: Add proper validation logic here!
+        self.pending_transactions=[]
         self.chain.append(block)
 
     def isOpen(self):

@@ -33,6 +33,22 @@ def blockChain():
         }
     return jsonify(response), 200
 
+@app.route('/blockchain/minar', methods=['POST'])
+def mine():
+    txRequest = request.get_json()
+    # parseo del json para obtener un objeto valido
+    message, error = Parser.parseJson(txRequest)
+    if error:
+        return message, 400
+    # cerrar bloque
+    response = coordinator.minar(message)
+
+    if response['error'] \
+            and response['error']['code'] != 0:
+        return response, response['error']['code']
+
+    return jsonify(response), 200
+
 '''
 se usa post para obtener dto para tener varias propiedades para la creación
 '''

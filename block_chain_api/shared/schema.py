@@ -8,15 +8,15 @@ from marshmallow_oneofschema import OneOfSchema
 class Wallet(Schema):
     public_key  = fields.Str(required=True)
     signature   = fields.Str()
-    balance     =fields.Int()
+    balance     = fields.Int()
     timestamp   = fields.Int()
 
 class Transaction(Schema):
-    timestamp = fields.Int()
-    sender = fields.Str(required=True)
-    receiver = fields.Str(required=True)
-    amount = fields.Int(required=True)
-    signature = fields.Str(required=True)
+    timestamp =  fields.Int()
+    sender    =  fields.Str(required=True)
+    receiver  =  fields.Str(required=True)
+    amount    =  fields.Int(required=True)
+    signature =  fields.Str(required=True)
 
     class Meta:
         ordered = True
