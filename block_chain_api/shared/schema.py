@@ -9,14 +9,14 @@ class Wallet(Schema):
     public_key  = fields.Str(required=True)
     signature   = fields.Str()
     balance     = fields.Int()
-    timestamp   = fields.Int()
+    timestamp   = fields.Str()
 
 class Transaction(Schema):
-    timestamp =  fields.Int()
+    timestamp =  fields.Str()
     sender    =  fields.Str(required=True)
     receiver  =  fields.Str(required=True)
     amount    =  fields.Int(required=True)
-    signature =  fields.Str(required=True)
+    signature =  fields.Str()
 
     class Meta:
         ordered = True
@@ -30,7 +30,7 @@ class Block(Schema):
     hash = fields.Str(required=True)
     previous_hash = fields.Str(required=True)
     nonce = fields.Str(required=True)
-    timestamp = fields.Int(required=True)
+    timestamp = fields.Str(required=True)
 
     class Meta:
         ordered = True
@@ -48,12 +48,10 @@ class Cliente(Schema):
     ip = fields.Str(required=True)
     port = fields.Int(required=True)
 
-
-
-
-
 class Ping(Schema):
     pass
+
+
 
 
 

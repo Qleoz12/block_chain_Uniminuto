@@ -13,6 +13,11 @@ logger = structlog.getLogger(__name__)
 '''
 clase encargada de manejar los cuerpos de los json
 '''
+class BlockChainMessage(Schema):
+    chain = fields.Nested(Block,many=True)
+    pending_transactions = fields.Nested(Transaction,many=True)
+    target = fields.Str()
+    wallets = fields.Nested(Wallet,many=True)
 
 class BlockMessage(Schema):
     payload = fields.Nested(Block)
@@ -72,10 +77,10 @@ def create_block_message(external_ip, external_port, block):
 def create_transaction_message(external_ip, external_port, tx):
     return BaseSchema().dumps(
         {
-            "meta": meta(external_ip, external_port),
-            "message": {
-                "name": "transaction",
-                "payload": tx,
+            'meta': meta(external_ip, external_port),
+            'message': {
+                'name': 'transaction',
+                'payload': tx,
             },
         }
     )
@@ -134,3 +139,4 @@ class BaseSchema(Schema):
     meta= fields.Nested(MetaSchema())
     message = fields.Nested(MessageDisambiguation())
     error = fields.Nested(Error(),missing=Error().load({}))
+

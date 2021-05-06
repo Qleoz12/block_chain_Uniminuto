@@ -1,10 +1,13 @@
 import sys, os
 from datetime import datetime
 
-sys.path.append(os.path.abspath('.'))
 
+sys.path.append(os.path.abspath('.'))
+import ast
+from block_chain_api.utils.parser import Parser
 from block_chain_api.shared.request import BaseSchema, TransactionMessage, Error, WalletMessage, BlockMessage,create_transaction_message
-from block_chain_api.shared.models import WalletModel
+from block_chain_api.shared.models import WalletModel, TransactionModel
+from block_chain_api.shared.schema import Block
 
 import structlog
 logger = structlog.getLogger(__name__)
@@ -46,12 +49,13 @@ class Coordinator(object):
 
     def checkWallets(self, sender, receiver):
         senderWallet=WalletModel(sender)
-        receiverWallet=WalletModel(sender)
+        receiverWallet=WalletModel(receiver)
         senderWallet  = self.blockchain.checkWallet(senderWallet)
         receiverWallet = self.blockchain.checkWallet(receiverWallet)
         return senderWallet, receiverWallet
 
     def registrarTransaccion(self,tx: BaseSchema):
+        logger.info(tx)
         txmodel=TransactionMessage().make(tx['message']['payload'])
         canregister,sender,receiver=self.register.checkTransaccion(txmodel)
 
@@ -61,7 +65,7 @@ class Coordinator(object):
             tx['error']['code'] = 400
             return tx
         #validacion
-        if not sender.balance>txmodel.amount:
+        if  sender.public_key!="master" and not self.blockchain.calculateBalance(sender)>txmodel.amount:
             logger.info("fallo de montos")
             tx['error']['message'] = "el monto supera los balances"
             tx['error']['code'] = 400
@@ -87,23 +91,36 @@ class Coordinator(object):
 
     def minar(self,walletrequest: BaseSchema):
 
-        block= self.minero.minar()
-        block.mined_by=walletrequest['message']['payload']['public_key']
-        self.blockchain.add_block(block)
+        blockMined= self.minero.minar()
+        if not blockMined:
+            logger.info("no hay bloques para minar")
+            walletrequest['error']['message'] = "no se puede minar en este momento"
+            walletrequest['error']['code'] = 400
+            return walletrequest
+
+        blockMined["mined_by"]=walletrequest['message']['payload']['public_key']
+        self.blockchain.add_block(blockMined)
         #llenado de data
         ip=walletrequest['meta']['address']['ip']
         port=walletrequest['meta']['address']['port']
-        tx=TransactionMessage.load({
-            "sender": "master",
-            "receiver": walletrequest['message']['payload']['public_key'],
-            "amount": "10"})
-        txmessage=create_transaction_message(ip,port,tx)
-        txreaponse=self.registrarTransaccion(txmessage)
+        payload={
+            'sender': 'master',
+            'receiver': walletrequest['message']['payload']['public_key'],
+            'amount': '10',
+            'signature':'',
+            'timestamp': ''
+        }
+        walletrequest['message']['payload']=Block().dumps(blockMined)
+        txreaponse=self.registrarTransaccion({"message":{"payload":payload},"error": {"code":0,"message":None}})
         logger.info(txreaponse)
-        return block
+        return walletrequest
 
-
-
+    def calcularSaldos(self, walletrequest: BaseSchema):
+        balance=0
+        wallet = WalletMessage().make(walletrequest['message']['payload'])
+        balance=self.blockchain.calculateBalance(wallet)
+        walletrequest['message']['payload']['balance']=balance
+        return walletrequest
 
 
 from .register import Register

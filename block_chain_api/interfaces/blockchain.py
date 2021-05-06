@@ -7,6 +7,8 @@ from time import time
 import structlog
 
 from block_chain_api.shared.models import WalletModel, TransactionModel
+from block_chain_api.shared.request import TransactionMessage
+from block_chain_api.shared.schema import Transaction
 
 logger = structlog.getLogger("blockchain")
 
@@ -39,7 +41,7 @@ class Blockchain(object):
     ):
         block = {
             "height": height,
-            "transactions": transactions,
+            "transactions": Transaction().dump(transactions,many=True),
             "previous_hash": previous_hash,
             "nonce": nonce,
             "target": target,
@@ -97,18 +99,67 @@ class Blockchain(object):
         return None,None
 
     def checkWallet(self,wallettocheck:WalletModel):
+        if wallettocheck.public_key == "master":
+            return wallettocheck
         for wallet in self.wallets:
             if wallet.public_key == wallettocheck.public_key:
                 return wallet
 
+
         return None
 
-    def registerWallet(self,wallet: WalletModel):
-        if not wallet.balance:
-            wallet.balance=0
-        if True:
+    def registerWallet(self,wallettoRegister: WalletModel):
+        ispresent=False
 
-            self.wallets.append(wallet)
-            return wallet
+        if not wallettoRegister.balance:
+            wallettoRegister.balance=0
+
+        for wallet in self.wallets:
+            if wallet.public_key == wallettoRegister.public_key:
+                ispresent=True
+                break
+
+        if ispresent:
+            logger.info("wallet presente")
+            return None
+
+        if not ispresent:
+            self.wallets.append(wallettoRegister)
+            return wallettoRegister
 
 
+    def calculateBalance(self,wallet:WalletModel):
+        balance = 0
+        inicial = 0
+        debts = 0
+        actives = 0
+        wallet = self.checkWallet(wallet)
+        if len(self.chain)>0:
+            blockbalance=0
+            for blockinchain in self.chain:
+                blockbalance+=self.calcularBalanceperBlock(wallet,blockinchain)
+
+            balance+=blockbalance;
+
+        #current
+        for tx in self.pending_transactions:
+            if tx.receiver == wallet.public_key:
+                actives += tx.amount
+            if tx.sender == wallet.public_key:
+                debts += tx.amount
+
+        balance = wallet.balance+balance + actives - debts
+        return balance
+
+    def calcularBalanceperBlock(self,wallet:WalletModel,block):
+        debts = 0
+        actives = 0
+        for tx in block['transactions']:
+            txmodel=TransactionMessage().make(tx)
+            if txmodel.receiver == wallet.public_key:
+                actives += tx.amount
+            if txmodel.sender == wallet.public_key:
+                debts += tx.amount
+
+        balance = actives- debts
+        return balance

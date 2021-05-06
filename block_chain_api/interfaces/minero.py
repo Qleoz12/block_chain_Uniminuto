@@ -17,8 +17,9 @@ class Minero(object):
 
         while not(self.blockchain.isOpen()):
             new_block = self.blockchain.new_block()
-            logger.info(new_block)
+            #logger.info(new_block)
             if self.blockchain.valid_block(new_block):
                 break
 
+        logger.info("minado completado")
         return new_block

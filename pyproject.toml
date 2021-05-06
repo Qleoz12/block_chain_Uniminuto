@@ -12,6 +12,7 @@ marshmallow = "^3.11.1"
 colorama = "^0.4.4"
 marshmallow-oneofschema = "^2.1.0"
 structlog = "^21.1.0"
+jsbeautifier = "^1.13.13"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"

@@ -1,36 +1,33 @@
 import sys
 sys.path.append("..")
+import marshmallow
+from block_chain_api.shared.request import BlockChainMessage
 import flask
-
+import jsbeautifier
 from prompt_toolkit.filters import app
 from flask import Flask, jsonify, request
 from utils.parser import Parser
 from interfaces.coordinator import Coordinator
+
 import structlog
 logger = structlog.getLogger(__name__)
 coordinator = Coordinator()
 
 # clase encargada del manejo del blockcain
-
-class Blockcain:
-    pass
-class RequestEsquema:
-    pass
-
-
-
-
 app = flask.Flask(__name__)
 app.config["DEBUG"] = True
 
 
-
 @app.route('/blockchain', methods=['GET'])
 def blockChain():
+    opts = jsbeautifier.default_options()
+    opts.indent_size = 2
+
     response = {
-    "chain":"json del blockchain.py",
-    "size":"numero de bloques",
+    "chain":BlockChainMessage().dumps(coordinator.blockchain),
+    "size": len(coordinator.blockchain.chain),
         }
+
     return jsonify(response), 200
 
 @app.route('/blockchain/minar', methods=['POST'])
@@ -79,7 +76,7 @@ def wallet_checkFondos():
         if error:
             return message,400
         #crear consulta
-        txregistrada=coordinator.consultarFondos(message)
+        txregistrada=coordinator.calcularSaldos(message)
 
         if txregistrada['error']\
         and message['error']['code']!=0:
